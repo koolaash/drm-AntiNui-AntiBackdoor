@@ -30,8 +30,8 @@ More in [INSTALL.md](INSTALL.md) and [CONFIG.md](CONFIG.md).
 
 | | |
 |---|---|
-| **Store** | [dreamscripts.shop](https://www.dreamscripts.shop/) |
-| **Dream Script Discord** | [Join (support & community)](https://discord.gg/nkMTBARzz4) |
+| **Store** | [Click Here](https://www.dreamscripts.shop/) |
+| **Dream Script Discord** | [Join](https://discord.gg/nkMTBARzz4) |
 | **GitHub** | [koolaash](https://github.com/koolaash) |
-| **Portfolio** | [dreamscripting.vercel.app](https://dreamscripting.vercel.app/) |
+| **Portfolio** | [Click Here](https://dreamscripting.vercel.app/) |
 | **Personal Discord** | [Join](https://discord.gg/BgDzU5AcA2) |
