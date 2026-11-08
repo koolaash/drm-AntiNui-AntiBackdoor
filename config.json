@@ -1,0 +1,50 @@
+{
+  "scanOnStartup": true,
+  "scanOnResourceStart": true,
+  "startupDelayMs": 1500,
+  "stopInfectedResources": true,
+  "enablePeriodicScan": true,
+  "intervalMinutes": 5,
+  "monitorHttpRequests": true,
+  "logOutboundHttp": true,
+  "maliciousUrlsFile": "malicious_urls.json",
+  "antiNuiDevTools": true,
+  "nuiDevToolsKickMessage": "Security Violation: NUI DevTools is not permitted on this server.",
+  "enableHeartbeat": true,
+  "heartbeatTimeoutSeconds": 120,
+  "heartbeatIntervalSeconds": 20,
+  "connectGracePeriodSeconds": 120,
+  "adminWhitelist": [
+    "license:45d9f75fc8acd37fb0f5f274564fccfef6c7eda1",
+    "discord:294468324115349505"
+  ],
+  "ignoredUrlPatterns": [
+    "github.com",
+    "raw.githubusercontent.com",
+    "github.io",
+    "gitlab.com"
+  ],
+  "whitelistResources": [
+    "drm-scanner",
+    "monitor",
+    "txAdmin",
+    "yarn",
+    "webpack",
+    "screenshot-basic"
+  ],
+  "ignoreFolders": [
+    "node_modules",
+    ".git",
+    ".vscode",
+    "cache",
+    ".system_generated"
+  ],
+  "scanExtensions": [
+    ".lua",
+    ".js",
+    ".ts",
+    ".html",
+    ".htm",
+    ".json"
+  ]
+}
