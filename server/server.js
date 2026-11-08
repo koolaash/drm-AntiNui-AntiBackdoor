@@ -36,7 +36,7 @@ function loadConfig() {
     try {
         const configRaw = fs.readFileSync(path.join(resPath, 'config.json'), 'utf8');
         config = { ...config, ...JSON.parse(configRaw) };
-    } catch (_) {}
+    } catch (_) { }
 
     try {
         const fileName = config.maliciousUrlsFile || 'malicious_urls.json';
@@ -149,7 +149,7 @@ function inspectBase64Strings(content) {
                 });
                 break;
             }
-        } catch (_) {}
+        } catch (_) { }
     }
     return threats;
 }
@@ -212,7 +212,7 @@ function getResourceFiles(dirPath) {
                     const stat = fs.statSync(fullPath);
                     isDir = stat.isDirectory();
                     isFile = stat.isFile();
-                } catch (_) {}
+                } catch (_) { }
             }
 
             if (isDir) {
@@ -231,7 +231,7 @@ function getResourceFiles(dirPath) {
                 }
             }
         }
-    } catch (_) {}
+    } catch (_) { }
     return files;
 }
 
@@ -306,14 +306,13 @@ function scanResource(resName, isFullScan) {
                     snippet: m.snippet
                 });
             });
-        } catch (_) {}
+        } catch (_) { }
     }
 
     return { threats, modifiedCount };
 }
 
 function handleThreats(resName, threats, triggerContext = 'AUDIT') {
-    console.log('^1[DRM-SCANNER] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!^7');
     console.log(`^1[DRM-SCANNER] [${triggerContext}] BACKDOOR / CIPHER DETECTED IN RESOURCE: ^7^3${resName}^7`);
 
     threats.forEach(t => {
@@ -323,7 +322,7 @@ function handleThreats(resName, threats, triggerContext = 'AUDIT') {
     });
 
     if (config.stopInfectedResources) {
-        try { CancelEvent(); } catch (_) {}
+        try { CancelEvent(); } catch (_) { }
         const stopped = StopResource(resName);
         if (stopped) {
             console.log(`^1[DRM-SCANNER]   -> ACTION: Resource ^3${resName}^1 has been BLOCKED and STOPPED.^7`);
@@ -333,16 +332,14 @@ function handleThreats(resName, threats, triggerContext = 'AUDIT') {
     } else {
         console.log(`^3[DRM-SCANNER]   -> NOTICE: Resource stop is disabled in config (stopInfectedResources: false).^7`);
     }
-    console.log('^1[DRM-SCANNER] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!^7');
+    console.log('^1[DRM-SCANNER] !!^7');
 }
 
 function runSecurityScan(isFullScan = true) {
     loadConfig();
 
     if (isFullScan) {
-        console.log('^3[DRM-SCANNER] ====================================================^7');
-        console.log('^3[DRM-SCANNER] Starting Full Server Resource Security Audit...^7');
-        console.log('^3[DRM-SCANNER] ====================================================^7');
+        console.log('^3[DRM-SCANNER] Starting Full Scan^7');
     }
 
     const totalResources = GetNumResources();
@@ -373,9 +370,7 @@ function runSecurityScan(isFullScan = true) {
     }
 
     if (isFullScan) {
-        console.log('^2[DRM-SCANNER] ====================================================^7');
         console.log(`^2[DRM-SCANNER] Scan Complete: ^7Audited ${scannedResources} resources | Blocked ${blockedCount} threats.`);
-        console.log('^2[DRM-SCANNER] ====================================================^7');
     } else if (totalModifiedFiles > 0) {
         console.log(`^2[DRM-SCANNER] Live Scan: Checked ${totalModifiedFiles} updated file(s) across resources. Blocked: ${blockedCount}^7`);
     }
@@ -446,7 +441,7 @@ function setupHttpMonitoring() {
         let decodedUrl = lowerUrl;
         try {
             decodedUrl = decodeURIComponent(lowerUrl);
-        } catch (_) {}
+        } catch (_) { }
 
         for (const pattern of maliciousPatterns) {
             if (pattern && pattern.length > 3) {
@@ -460,7 +455,7 @@ function setupHttpMonitoring() {
     }
 
     function wrapRequest(originalFn, defaultProtocol) {
-        return function(...args) {
+        return function (...args) {
             const check = checkUrl(args[0], defaultProtocol);
 
             if (check.isMalicious) {
@@ -502,7 +497,7 @@ function setupHttpMonitoring() {
 
     if (typeof global.fetch === 'function') {
         const originalFetch = global.fetch;
-        global.fetch = async function(resource, options) {
+        global.fetch = async function (resource, options) {
             const check = checkUrl(resource, 'https:');
             if (check.isMalicious) {
                 console.log('^1[DRM-SCANNER] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!^7');
@@ -525,7 +520,7 @@ function setupHttpMonitoring() {
 
     if (typeof global.PerformHttpRequest === 'function') {
         const originalPerformHttpRequest = global.PerformHttpRequest;
-        global.PerformHttpRequest = function(url, cb, method, data, headers, options) {
+        global.PerformHttpRequest = function (url, cb, method, data, headers, options) {
             const check = checkUrl(url, 'http:');
             if (check.isMalicious) {
                 console.log('^1[DRM-SCANNER] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!^7');

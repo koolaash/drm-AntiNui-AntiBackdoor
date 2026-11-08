@@ -77,7 +77,6 @@ Run these directly in the server console (txAdmin or server terminal):
 2. Check your server console for:
    ```
    [DRM-SCANNER] Outbound HTTP/HTTPS Request Monitor & Firewall Initialized.
-   [DRM-SCANNER] ====================================================
-   [DRM-SCANNER] Starting Full Server Resource Security Audit...
+   [DRM-SCANNER] Starting Full Scan
    ```
 3. Connect in-game with a non-whitelisted account and confirm that normal gameplay runs smoothly with heartbeat pulses registered every 20 seconds.
