@@ -29,12 +29,3 @@ Automated real-time anti-backdoor and cipher threat detection system for FiveM.
 3. Restart your server or start the resource in the console.
 
 ---
-
-## GitHub Social Preview Tip
-
-To set this image as the repository's main preview card on GitHub:
-1. Go to your repository on GitHub.
-2. Navigate to **Settings** > **General**.
-3. Scroll down to **Social preview** and click **Edit** > **Upload an image**.
-4. Upload `Thumbnail - Security Scanner.png`.
-
