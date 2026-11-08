@@ -1,9 +1,9 @@
 fx_version 'cerulean'
 game 'gta5'
 
-author 'DRM'
-description 'DRM Security & Anti-Backdoor Scanner'
-version '1.0.0'
+author 'Dream Scripts'
+description 'Drm Anti Nui & Anti Backdoor'
+version '1.0.4'
 
 ui_page 'html/index.html'
 

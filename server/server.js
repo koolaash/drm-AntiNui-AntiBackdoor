@@ -7,7 +7,6 @@ const https = require('https');
 const currentRes = GetCurrentResourceName();
 const resPath = GetResourcePath(currentRes);
 
-// Default configuration
 let config = {
     scanOnStartup: true,
     scanOnResourceStart: true,
@@ -39,7 +38,6 @@ function loadConfig() {
         config = { ...config, ...JSON.parse(configRaw) };
     } catch (_) {}
 
-    // Load dedicated malicious URLs file
     try {
         const fileName = config.maliciousUrlsFile || 'malicious_urls.json';
         const urlsRaw = fs.readFileSync(path.join(resPath, fileName), 'utf8');
@@ -56,16 +54,13 @@ function loadConfig() {
 
 loadConfig();
 
-// Cache for tracking file modification timestamps (mtime)
 const fileMtimeCache = new Map();
 
-// Helper to determine exact 1-based line number from string index
 function getLineNumber(content, index) {
     if (index === undefined || index === null || index < 0) return 1;
     return content.substring(0, index).split('\n').length;
 }
 
-// Known malicious signatures
 const SIGNATURES = [
     {
         id: 'B64_EVAL_BACKDOOR',
@@ -123,7 +118,6 @@ const SIGNATURES = [
     }
 ];
 
-// Helper: Inspect Base64 blocks for hidden loaders, ignoring whitelisted version hosts
 function inspectBase64Strings(content) {
     const b64Regex = /["']([A-Za-z0-9+/]{40,}={0,2})["']/g;
     let match;
@@ -135,7 +129,6 @@ function inspectBase64Strings(content) {
             const decoded = Buffer.from(match[1], 'base64').toString('utf8');
             const lowerDecoded = decoded.toLowerCase();
 
-            // Check if this payload targets an ignored version check host
             const isIgnored = ignoredUrls.some(url => lowerDecoded.includes(url.toLowerCase()));
             if (isIgnored) continue;
 
@@ -161,7 +154,6 @@ function inspectBase64Strings(content) {
     return threats;
 }
 
-// Helper: Match signatures and find exact line numbers, ignoring version check URLs
 function testSignatures(content) {
     const threats = [];
     const ignoredUrls = config.ignoredUrlPatterns || [];
@@ -188,7 +180,6 @@ function testSignatures(content) {
         }
     }
 
-    // Dynamic test against all loaded malicious endpoints from malicious_urls.json
     for (const pattern of maliciousPatterns) {
         if (!pattern || pattern.length < 4) continue;
         const lowerPat = pattern.toLowerCase();
@@ -206,7 +197,6 @@ function testSignatures(content) {
     return threats;
 }
 
-// Directory crawler strictly excluding node_modules and ignore list (with symlink resolution)
 function getResourceFiles(dirPath) {
     let files = [];
     try {
@@ -245,7 +235,6 @@ function getResourceFiles(dirPath) {
     return files;
 }
 
-// Scan files within a resource (supports full scan or incremental modified check)
 function scanResource(resName, isFullScan) {
     let rootPath;
     try {
@@ -270,13 +259,13 @@ function scanResource(resName, isFullScan) {
     for (const filePath of files) {
         try {
             const stat = fs.statSync(filePath);
-            if (stat.size > 10 * 1024 * 1024) continue; // Skip files > 10MB
+            if (stat.size > 10 * 1024 * 1024) continue;
 
             const lastMtime = fileMtimeCache.get(filePath);
             const isModified = !lastMtime || stat.mtimeMs > lastMtime;
 
             if (!isFullScan && !isModified) {
-                continue; // File hasn't changed since last check
+                continue;
             }
 
             modifiedCount++;
@@ -299,7 +288,6 @@ function scanResource(resName, isFullScan) {
 
             const relativePath = path.relative(rootPath, filePath);
 
-            // 1. Signature Tests with Line Numbers
             const sigMatches = testSignatures(content);
             sigMatches.forEach(m => {
                 threats.push({
@@ -309,7 +297,6 @@ function scanResource(resName, isFullScan) {
                 });
             });
 
-            // 2. Base64 Inspection with Line Numbers
             const b64Matches = inspectBase64Strings(content);
             b64Matches.forEach(m => {
                 threats.push({
@@ -325,7 +312,6 @@ function scanResource(resName, isFullScan) {
     return { threats, modifiedCount };
 }
 
-// Print threat alert and stop resource if configured
 function handleThreats(resName, threats, triggerContext = 'AUDIT') {
     console.log('^1[DRM-SCANNER] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!^7');
     console.log(`^1[DRM-SCANNER] [${triggerContext}] BACKDOOR / CIPHER DETECTED IN RESOURCE: ^7^3${resName}^7`);
@@ -350,7 +336,6 @@ function handleThreats(resName, threats, triggerContext = 'AUDIT') {
     console.log('^1[DRM-SCANNER] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!^7');
 }
 
-// Main scan runner across all resources
 function runSecurityScan(isFullScan = true) {
     loadConfig();
 
@@ -369,7 +354,6 @@ function runSecurityScan(isFullScan = true) {
         const resName = GetResourceByFindIndex(i);
         if (!resName) continue;
 
-        // Skip whitelisted resources
         if (config.whitelistResources.map(r => r.toLowerCase()).includes(resName.toLowerCase())) {
             continue;
         }
@@ -397,7 +381,6 @@ function runSecurityScan(isFullScan = true) {
     }
 }
 
-// Intercept resource startup and instantly scan it before execution
 const recentlyScanned = new Map();
 
 function handleResourceStart(resName) {
@@ -412,12 +395,10 @@ function handleResourceStart(resName) {
     }
     recentlyScanned.set(resName, now);
 
-    // Skip whitelisted resources
     if (config.whitelistResources.map(r => r.toLowerCase()).includes(resName.toLowerCase())) {
         return;
     }
 
-    // Instantly scan all files of the starting resource
     try {
         const result = scanResource(resName, true) || {};
         const threats = result.threats || [];
@@ -435,9 +416,6 @@ function handleResourceStart(resName) {
 on('onResourceStarting', (resName) => handleResourceStart(resName));
 on('onServerResourceStart', (resName) => handleResourceStart(resName));
 
-// ============================================================================
-// OUTBOUND HTTP / HTTPS & PerformHttpRequest FIREWALL
-// ============================================================================
 let httpMonitoringInitialized = false;
 
 function setupHttpMonitoring() {
@@ -545,7 +523,6 @@ function setupHttpMonitoring() {
         };
     }
 
-    // FiveM Native PerformHttpRequest Interceptor
     if (typeof global.PerformHttpRequest === 'function') {
         const originalPerformHttpRequest = global.PerformHttpRequest;
         global.PerformHttpRequest = function(url, cb, method, data, headers, options) {
@@ -575,10 +552,6 @@ function setupHttpMonitoring() {
 
     console.log('^2[DRM-SCANNER] Outbound HTTP/HTTPS & PerformHttpRequest Monitor & Firewall Initialized.^7');
 }
-
-// ============================================================================
-// ADMIN WHITELIST, ANTI-NUI DEVTOOLS & HEARTBEAT WATCHDOG
-// ============================================================================
 
 function isAdmin(srcInput) {
     if (!config.adminWhitelist || !Array.isArray(config.adminWhitelist) || config.adminWhitelist.length === 0) {
@@ -658,7 +631,6 @@ function dispatchChallengeToPlayer(src) {
     TriggerClientEvent('drm-scanner:client:sendChallenge', src, challengeId, token, salt, seq);
 }
 
-// 1. Fast NUI-Ready Handshake Listener
 const lastNuiReadyTime = new Map();
 
 onNet('drm-scanner:server:nuiReady', (nuiToken) => {
@@ -681,7 +653,6 @@ onNet('drm-scanner:server:nuiReady', (nuiToken) => {
     dispatchChallengeToPlayer(src);
 });
 
-// 2. Anti-NUI DevTools detection listener (strictly whitelisting verified detection methods)
 const VALID_DEVTOOLS_DETECTION_METHODS = new Set(['debugger_timing', 'native_function_hooked', 'key_shortcut']);
 
 onNet('drm-scanner:server:nuiDevToolsDetected', (method) => {
@@ -706,7 +677,6 @@ onNet('drm-scanner:server:nuiDevToolsDetected', (method) => {
     cleanupPlayer(src);
 });
 
-// 3. Client Player Spawned / Finished Loading Listener (Triggered when player exits loading screen and enters character menu)
 onNet('drm-scanner:server:playerReady', () => {
     const src = String(source);
     if (!src || src === '0' || !GetPlayerName(src)) return;
@@ -720,7 +690,6 @@ onNet('drm-scanner:server:playerReady', () => {
     }
 });
 
-// 4. Challenge-Response Heartbeat Receiver with Monotonic Sequence & Sliding Challenge Queue
 onNet('drm-scanner:server:heartbeatResponse', (data) => {
     const src = String(source);
     if (!src || src === '0' || !GetPlayerName(src)) return;
@@ -774,13 +743,11 @@ onNet('drm-scanner:server:heartbeatResponse', (data) => {
         return;
     }
 
-    // Challenge verified successfully
     challenges.delete(matchedId);
     playerSequences.set(src, pending.seq + 1);
     playerHeartbeats.set(src, Date.now());
 });
 
-// 5. Connection tracking with normalized string keys
 on('playerJoining', () => {
     const src = String(source);
     const now = Date.now();
@@ -795,7 +762,6 @@ on('playerDropped', () => {
     cleanupPlayer(src);
 });
 
-// 6. Challenge Dispatcher & Watchdog Timer
 let heartbeatWatchdogTimer = null;
 let challengeDispatcherTimer = null;
 
@@ -830,7 +796,6 @@ function setupHeartbeatWatchdog() {
         }
     }, intervalSec * 1000);
 
-    // Watchdog checking for expired heartbeats
     heartbeatWatchdogTimer = setInterval(() => {
         const now = Date.now();
         const players = getPlayers();
@@ -858,7 +823,6 @@ function setupHeartbeatWatchdog() {
     }, 5000);
 }
 
-// Background periodic timer
 let periodicTimer = null;
 function setupPeriodicScan() {
     if (periodicTimer) clearInterval(periodicTimer);
@@ -866,11 +830,10 @@ function setupPeriodicScan() {
 
     const intervalMs = Math.max(1, config.intervalMinutes || 5) * 60 * 1000;
     periodicTimer = setInterval(() => {
-        runSecurityScan(false); // Incremental live scan
+        runSecurityScan(false);
     }, intervalMs);
 }
 
-// Initial scan trigger on server startup
 setupHttpMonitoring();
 setupHeartbeatWatchdog();
 
@@ -883,7 +846,6 @@ if (config.scanOnStartup) {
     setupPeriodicScan();
 }
 
-// Console command: scancode [full]
 RegisterCommand('scancode', (source, args) => {
     if (source === 0) {
         const isFull = args[0] && (args[0].toLowerCase() === 'full' || args[0].toLowerCase() === '-f');

@@ -1,11 +1,7 @@
-// DRM Security - Hardened Anti-NUI DevTools & Anti-Console-Injection Engine
-// Cleaned & Optimized: Zero Console Spam, False-Positive Tolerant, Microtask Rescheduling
-(function() {
+// Drm Anti Nui & Anti Backdoor
+(function () {
   'use strict';
 
-  // ==========================================================================
-  // STEP 1: CACHE PRISTINE NATIVE REFERENCES BEFORE ANY TAMPERING / INJECTION
-  // ==========================================================================
   const _fetch = window.fetch ? window.fetch.bind(window) : null;
   const _XMLHttpRequest = window.XMLHttpRequest;
   const _Function_toString = Function.prototype.toString;
@@ -23,9 +19,6 @@
     return window.GetParentResourceName ? window.GetParentResourceName() : 'drm-scanner';
   }
 
-  // ==========================================================================
-  // STEP 2: VIOLATION REPORTER
-  // ==========================================================================
   function reportViolation(method) {
     if (violationReported) return;
     violationReported = true;
@@ -35,18 +28,16 @@
       timestamp: _Date_now()
     });
 
-    // Transport 1: Native Fetch
     try {
       if (_fetch) {
         _fetch(`https://${getParentRes()}/drm:nuiDevToolsDetected`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json; charset=UTF-8' },
           body: payload
-        }).catch(function() {});
+        }).catch(function () { });
       }
-    } catch (_) {}
+    } catch (_) { }
 
-    // Transport 2: XMLHttpRequest Fallback
     try {
       if (_XMLHttpRequest) {
         const xhr = new _XMLHttpRequest();
@@ -54,12 +45,9 @@
         xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
         xhr.send(payload);
       }
-    } catch (_) {}
+    } catch (_) { }
   }
 
-  // ==========================================================================
-  // STEP 3: LOCK GLOBAL DESCRIPTORS AGAINST CONSOLE INJECTION OVERRIDES
-  // ==========================================================================
   try {
     if (_fetch) {
       _defineProperty(window, 'fetch', { value: _fetch, writable: false, configurable: false });
@@ -67,11 +55,8 @@
     if (_XMLHttpRequest) {
       _defineProperty(window, 'XMLHttpRequest', { value: _XMLHttpRequest, writable: false, configurable: false });
     }
-  } catch (_) {}
+  } catch (_) { }
 
-  // ==========================================================================
-  // STEP 4: ANTI-TAMPER & DEBOUNCED DEBUGGER TIMING
-  // ==========================================================================
   function isNative(fn) {
     try {
       return typeof fn === 'function' && _Function_toString.call(fn).indexOf('[native code]') !== -1;
@@ -96,7 +81,7 @@
       } else {
         debuggerSpikes = 0;
       }
-    } catch (_) {}
+    } catch (_) { }
   }
 
   // Master scheduler: Runs every 2500ms via un-clearable microtask chain
@@ -104,25 +89,21 @@
     if (violationReported) return;
 
     try {
-      // 1. Debounced debugger latency test
       checkDebuggerTiming();
 
-      // 2. Native function integrity check
       if (!isNative(window.fetch) || !isNative(Object.defineProperty) || !isNative(Function.prototype.toString)) {
         reportViolation('native_function_hooked');
       }
-    } catch (_) {}
+    } catch (_) { }
 
-    _setTimeout(function() {
+    _setTimeout(function () {
       Promise.resolve().then(runMasterProbes);
     }, 2500);
   }
 
-  // Start master monitoring loop
   Promise.resolve().then(runMasterProbes);
 
-  // Keyboard Shortcut Interceptor (F12, DevTools shortcuts, View Source)
-  window.addEventListener('keydown', function(e) {
+  window.addEventListener('keydown', function (e) {
     try {
       const isF12 = e.key === 'F12' || e.keyCode === 123;
       const isInspect = e.ctrlKey && e.shiftKey && (
@@ -137,15 +118,11 @@
         e.stopPropagation();
         reportViolation('key_shortcut');
       }
-    } catch (_) {}
+    } catch (_) { }
   }, true);
 
-  // ==========================================================================
-  // STEP 5: DYNAMIC CHALLENGE-RESPONSE WITH CEF ENTROPY & MONOTONIC SEQUENCE
-  // ==========================================================================
-
   // Generate unique CEF Canvas environment entropy
-  const _nuiSessionToken = (function() {
+  const _nuiSessionToken = (function () {
     let entropy = 0x5a5a5a5a;
     try {
       const cvs = document.createElement('canvas');
@@ -164,7 +141,7 @@
           entropy |= 0;
         }
       }
-    } catch (_) {}
+    } catch (_) { }
     return Math.abs(entropy).toString(16) + '_' + Math.random().toString(36).substring(2, 10);
   })();
 
@@ -178,8 +155,7 @@
     return Math.abs(hash).toString(16);
   }
 
-  // Heartbeat challenge & Handshake listener
-  window.addEventListener('message', function(event) {
+  window.addEventListener('message', function (event) {
     try {
       const data = event.data;
       if (!data) return;
@@ -211,17 +187,16 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json; charset=UTF-8' },
           body: respPayload
-        }).catch(function() {});
+        }).catch(function () { });
       } else if (_XMLHttpRequest) {
         const xhr = new _XMLHttpRequest();
         xhr.open('POST', `https://${getParentRes()}/drm:nuiHeartbeatResponse`, true);
         xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
         xhr.send(respPayload);
       }
-    } catch (_) {}
+    } catch (_) { }
   });
 
-  // Reliable Handshake: Informs client/server that NUI is mounted and ready
   let nuiReadyAcknowledged = false;
 
   function notifyNuiReady() {
@@ -232,24 +207,22 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json; charset=UTF-8' },
           body: payload
-        }).then(function() {
+        }).then(function () {
           nuiReadyAcknowledged = true;
-        }).catch(function() {});
+        }).catch(function () { });
       } else if (_XMLHttpRequest) {
         const xhr = new _XMLHttpRequest();
         xhr.open('POST', `https://${getParentRes()}/drm:nuiReady`, true);
         xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-        xhr.onload = function() { nuiReadyAcknowledged = true; };
+        xhr.onload = function () { nuiReadyAcknowledged = true; };
         xhr.send(payload);
       }
-    } catch (_) {}
+    } catch (_) { }
   }
 
-  // Initial announcement attempt
   _setTimeout(notifyNuiReady, 500);
 
-  // Periodic retry until handshake is established or challenge arrives
-  const handshakeInterval = setInterval(function() {
+  const handshakeInterval = setInterval(function () {
     if (nuiReadyAcknowledged) {
       clearInterval(handshakeInterval);
     } else {
