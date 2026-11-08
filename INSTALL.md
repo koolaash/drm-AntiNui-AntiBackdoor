@@ -1,82 +1,64 @@
-# Installation Guide - DRM Scanner
+# Install
 
-`drm-scanner` is a standalone security, anti-backdoor, and runtime protection resource for FiveM servers. It scans code for known malware/ciphers, intercepts outbound malicious HTTP requests, detects NUI DevTools inspection, and maintains an anti-bypass heartbeat system.
+No dependencies. FXServer Cerulean (build 3245 or newer) is recommended.
 
----
+## 1. Add the resource
 
-## 1. Requirements
-- **Dependencies**: None (100% Standalone).
-- **Server Artifact**: Recommended FXServer Cerulean (Server Build 3245+).
+Copy the folder into `resources` and keep the name `drm-scanner`. The default `whitelistResources` in `config.json` and the event names use that name, so a different folder name can make the scanner check itself.
 
----
-
-## 2. Installation Steps
-
-### Step 1: Resource Placement
-Ensure `drm-scanner` is placed inside your server resources folder:
-```
-resources/
-└── [custom]/
-    └── [drm]/
-        └── drm-scanner/
-            ├── client/
-            ├── html/
-            ├── server/
-            ├── config.json
-            ├── malicious_urls.json
-            ├── fxmanifest.lua
-            ├── INSTALL.md
-            └── CONFIG.md
+```text
+drm-scanner/
+├── client/client.lua
+├── html/index.html
+├── html/index.js
+├── server/server.js
+├── config.json
+├── malicious_urls.json
+└── fxmanifest.lua
 ```
 
-### Step 2: Server Configuration (`server.cfg`)
-Add `ensure drm-scanner` to your `server.cfg`.
+## 2. Add it to server.cfg
 
-> **Important**: Ensure `drm-scanner` **early** (before starting custom gameplay/script resources). This guarantees that startup code scans and outbound HTTP interception are active before other resources initialize:
+Start it before your other scripts so the HTTP monitor and startup scan are active when they load.
 
 ```cfg
-# Core & System Resources
 ensure chat
 ensure spawnmanager
 ensure sessionmanager
 
-# Security & Anti-Backdoor (Load Early)
 ensure drm-scanner
 
-# Other Frameworks & Custom Resources
 ensure ox_lib
 ensure es_extended # or qb-core / qbx_core
-...
 ```
 
-### Step 3: Add Admin Identifiers
-Open `config.json` and add your server administrators to `adminWhitelist` so they are not kicked if they open DevTools or test NUI pages:
+## 3. Whitelist your admins
+
+Add your staff to `adminWhitelist` in `config.json` so they aren't kicked for opening DevTools:
+
 ```json
 "adminWhitelist": [
-  "license:45d9f75fc8acd37fb0f5f274564fccfef6c7eda1",
-  "discord:294468324115349505"
+  "license:your_license_hash",
+  "discord:your_discord_id"
 ]
 ```
 
----
+A bare Discord ID also works.
 
-## 3. Server Console Commands
+## Console commands
 
-Run these directly in the server console (txAdmin or server terminal):
+Server console only.
 
 | Command | Description |
 | :--- | :--- |
-| `scancode` | Runs an incremental audit on new and modified resource files. |
-| `scancode full` (or `scancode -f`) | Clears the file cache and performs a full scan of all resource files. |
+| `scancode` | Checks files that are new or changed since the last scan. |
+| `scancode full` or `scancode -f` | Clears the cache and scans everything. |
 
----
+## Check that it works
 
-## 4. Verification
+Restart the resource and look for these in the console:
 
-1. Start or restart the server: `restart drm-scanner` or `ensure drm-scanner`.
-2. Check your server console for:
-   ```
-   [DRM-SCANNER] Outbound HTTP/HTTPS Request Monitor & Firewall Initialized.
-   [DRM-SCANNER] Starting Full Scan
-   ```
-3. Connect in-game with a non-whitelisted account and confirm that normal gameplay runs smoothly with heartbeat pulses registered every 20 seconds.
+```text
+[DRM-SCANNER] Outbound HTTP/HTTPS & PerformHttpRequest Monitor & Firewall Initialized.
+[DRM-SCANNER] Starting Full Scan
+```

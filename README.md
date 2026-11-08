@@ -4,31 +4,27 @@
 
 # DRM Security & Anti-Backdoor Scanner
 
-Automated real-time anti-backdoor and cipher threat detection system for FiveM.
+A standalone FiveM resource that scans your other resources for backdoors, blocks outbound requests to known malicious hosts, and kicks players who open NUI DevTools.
 
----
+## What it does
 
-## Features
+- Scans resource files at startup and on a timer for obfuscated `load()` calls, base64 payloads and similar backdoor patterns. Infected resources are stopped.
+- Watches server-side HTTP calls (`PerformHttpRequest`, `fetch`, http/https) and drops requests to hosts listed in `malicious_urls.json`.
+- Detects NUI DevTools on the client and kicks the player unless they are whitelisted.
+- Runs a challenge-response heartbeat between server and client to catch spoofed or disconnected clients.
+- Needs no other resources. Works with ESX, QBCore, Qbox or standalone.
 
-- **Anti-Cipher Sweeps**: Deep heuristic scanning for obfuscated and malicious backdoor code.
-- **Malicious URL & Webhook Interceptor**: Real-time outbound HTTP request protection.
-- **NUI DevTools Defense**: Live tamper and inspection detection for client-side interfaces.
-- **Cryptographic Heartbeat**: Challenge-response heartbeat synchronization.
-- **Multi-Framework Support**: Compatible with ESX, QBCore, Qbox, and Standalone.
-- **Zero Overhead**: Optimized runtime footprint (0.00ms resmon idle).
+## Setup
 
----
-
-## Installation
-
-1. Place the resource folder inside your server's `resources` directory.
-2. Add the start command to your `server.cfg`:
+1. Put the folder in your `resources` directory and name it `drm-scanner`.
+2. Add it near the top of your `server.cfg`:
    ```cfg
-   ensure drm-AntiNui
+   ensure drm-scanner
    ```
-3. Restart your server or start the resource in the console.
+3. Add your admin identifiers to `adminWhitelist` in `config.json`.
+4. Restart the server.
 
----
+More in [INSTALL.md](INSTALL.md) and [CONFIG.md](CONFIG.md).
 
 ## Credits
 

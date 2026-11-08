@@ -24,8 +24,8 @@ All configuration options are defined in `config.json`. Changes to this file tak
   "heartbeatIntervalSeconds": 20,
   "connectGracePeriodSeconds": 120,
   "adminWhitelist": [
-    "license:45d9f75fc8acd37fb0f5f274564fccfef6c7eda1",
-    "discord:294468324115349505"
+    "license:0000000000000000000000000000000000000000",
+    "discord:123456789012345678"
   ],
   "ignoredUrlPatterns": [
     "github.com",
@@ -114,8 +114,8 @@ All configuration options are defined in `config.json`. Changes to this file tak
 #### Formatting Examples:
 ```json
 "adminWhitelist": [
-  "license:45d9f75fc8acd37fb0f5f274564fccfef6c7eda1",
-  "discord:294468324115349505"
+  "license:0000000000000000000000000000000000000000",
+  "discord:123456789012345678"
 ]
 ```
 *(Identifiers can be provided with or without the `license:` / `discord:` prefix; both are recognized).*
