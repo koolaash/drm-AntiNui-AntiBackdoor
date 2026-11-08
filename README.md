@@ -29,3 +29,13 @@ Automated real-time anti-backdoor and cipher threat detection system for FiveM.
 3. Restart your server or start the resource in the console.
 
 ---
+
+## Credits
+
+| | |
+|---|---|
+| **Store** | [dreamscripts.shop](https://www.dreamscripts.shop/) |
+| **Dream Script Discord** | [Join (support & community)](https://discord.gg/nkMTBARzz4) |
+| **GitHub** | [koolaash](https://github.com/koolaash) |
+| **Portfolio** | [dreamscripting.vercel.app](https://dreamscripting.vercel.app/) |
+| **Personal Discord** | [Join](https://discord.gg/BgDzU5AcA2) |
